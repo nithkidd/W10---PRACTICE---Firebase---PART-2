@@ -5,13 +5,10 @@ import 'package:http/http.dart' as http;
 import '../../../model/artists/artist.dart';
 import '../../dtos/artist_dto.dart';
 import 'artist_repository.dart';
+import '../../firebaseUri.dart';
 
 
 class ArtistRepositoryFirebase extends ArtistRepository {
-    final Uri artistsUri = Uri.https(
-    'my-firebase-link.asia-southeast1.firebasedatabase.app',
-    '/artists.json',
-  );
 
   @override
   Future<List<Artist>> fetchArtists() async {

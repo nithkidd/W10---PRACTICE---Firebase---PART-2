@@ -1,4 +1,4 @@
-import 'package:advanced_flutter/W9-PRACTICE-FIREBASE-REST-API/data/repositories/artists/artist_repository.dart';
+import 'package:advanced_flutter/W10---PRACTICE---Firebase---PART-2/data/repositories/artists/artist_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'view_model/library_view_model.dart';

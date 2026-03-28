@@ -8,8 +8,8 @@ class SongTile extends StatelessWidget {
     super.key,
     required this.song,
     required this.isPlaying,
-    required this.onTap, required this.viewModel,
-    
+    required this.onTap,
+    required this.viewModel,
   });
 
   final LibraryViewModel viewModel;
@@ -29,15 +29,28 @@ class SongTile extends StatelessWidget {
         child: ListTile(
           onTap: onTap,
           title: Text(song.title),
-          subtitle: Text(
-            '${viewModel.getArtistName(song)} - ${viewModel.getArtistGenre(song)}',
+          subtitle: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${song.duration.inMinutes} min'),
+              SizedBox(width: 16),
+              Text('${song.likes} likes  '),
+            ],
           ),
           leading: CircleAvatar(
             backgroundImage: NetworkImage(song.imageURL.toString()),
           ),
-          trailing: Text(
-            isPlaying ? "Playing" : "",
-            style: TextStyle(color: Colors.amber),
+          trailing: IconButton(
+            onPressed: () async {
+              try {
+                await viewModel.likeSong(song.id);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to like song')),
+                );
+              }
+            },
+            icon: Icon(Icons.favorite),
           ),
         ),
       ),

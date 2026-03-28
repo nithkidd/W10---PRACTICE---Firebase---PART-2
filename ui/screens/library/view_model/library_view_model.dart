@@ -1,5 +1,5 @@
-import 'package:advanced_flutter/W9-PRACTICE-FIREBASE-REST-API/data/repositories/artists/artist_repository.dart';
-import 'package:advanced_flutter/W9-PRACTICE-FIREBASE-REST-API/model/artists/artist.dart';
+import 'package:advanced_flutter/W10---PRACTICE---Firebase---PART-2/data/repositories/artists/artist_repository.dart';
+import 'package:advanced_flutter/W10---PRACTICE---Firebase---PART-2/model/artists/artist.dart';
 import 'package:flutter/material.dart';
 import '../../../../data/repositories/songs/song_repository.dart';
 import '../../../states/player_state.dart';
@@ -38,7 +38,7 @@ class LibraryViewModel extends ChangeNotifier {
     return _artistById[song.artistId];
   }
 
-  void fetchSong() async {
+  Future<void> fetchSong() async {
     // 1- Loading state
     songsValue = AsyncValue.loading();
     notifyListeners();
@@ -49,6 +49,7 @@ class LibraryViewModel extends ChangeNotifier {
 
       List<Artist> artists = await artistRepository.fetchArtists();
 
+      _artistById.clear(); //clear before refetch
       for (final artist in artists) {
         _artistById[artist.id] = artist;
       }
@@ -61,7 +62,7 @@ class LibraryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-    String getArtistName(Song song) {
+  String getArtistName(Song song) {
     return _artistById[song.artistId]!.name;
   }
 
@@ -73,4 +74,23 @@ class LibraryViewModel extends ChangeNotifier {
 
   void start(Song song) => playerState.start(song);
   void stop(Song song) => playerState.stop();
+
+  Future<void> likeSong(String songId) async {
+    try {
+      await songRepository.likeSong(songId);
+
+      final currentSongs = songsValue.data!;
+      final updatedSongs = currentSongs.map((song) {
+        if (song.id == songId) {
+          return song.copyWith(likes: song.likes + 1);
+        }
+        return song;
+      }).toList();
+
+      songsValue = AsyncValue.success(updatedSongs);
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }              
+  }
 }
