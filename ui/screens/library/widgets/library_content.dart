@@ -18,26 +18,36 @@ class LibraryContent extends StatelessWidget {
 
     Widget content;
     switch (asyncValue.state) {
-      
       case AsyncValueState.loading:
         content = Center(child: CircularProgressIndicator());
         break;
       case AsyncValueState.error:
-        content = Center(child: Text('error = ${asyncValue.error!}', style: TextStyle(color: Colors.red),));
-
-      case AsyncValueState.success:
-        List<Song> songs = asyncValue.data!;
-        content = ListView.builder(
-          itemCount: songs.length,
-          itemBuilder: (context, index) => SongTile(
-            song: songs[index],
-            viewModel: mv,
-            isPlaying: mv.isSongPlaying(songs[index]),
-            onTap: () {
-              mv.start(songs[index]);
-            },
+        content = Center(
+          child: Text(
+            'error = ${asyncValue.error!}',
+            style: TextStyle(color: Colors.red),
           ),
         );
+        break;
+      case AsyncValueState.success:
+        List<Song> songs = asyncValue.data!;
+        content = RefreshIndicator(
+          onRefresh: () async {
+            await mv.refreshSongs();
+          },
+          child: ListView.builder(
+            itemCount: songs.length,
+            itemBuilder: (context, index) => SongTile(
+              song: songs[index],
+              viewModel: mv,
+              isPlaying: mv.isSongPlaying(songs[index]),
+              onTap: () {
+                mv.start(songs[index]);
+              },
+            ),
+          ),
+        );
+        break;
     }
 
     return Padding(
@@ -47,6 +57,13 @@ class LibraryContent extends StatelessWidget {
         children: [
           SizedBox(height: 16),
           Text("Library", style: AppTextStyles.heading),
+          // refresh icon
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              await mv.refreshSongs();
+            },
+          ),
           SizedBox(height: 50),
 
           Expanded(child: content),

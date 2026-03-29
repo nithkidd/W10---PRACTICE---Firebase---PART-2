@@ -9,9 +9,16 @@ import '../../firebaseUri.dart';
 
 
 class ArtistRepositoryFirebase extends ArtistRepository {
+  List<Artist>? _cachedArtists;
 
   @override
-  Future<List<Artist>> fetchArtists() async {
+  Future<List<Artist>> fetchArtists({bool forceFetch = false}) async {
+
+    //cache check, return cache if exists
+    if (!forceFetch && _cachedArtists != null) {
+      return _cachedArtists!;
+    }
+
     final http.Response response = await http.get(artistsUri);
 
     if (response.statusCode == 200) {
@@ -24,6 +31,9 @@ class ArtistRepositoryFirebase extends ArtistRepository {
         Map<String, dynamic> values = iterable.value;
         result.add(ArtistDto.fromJson(artistId, values));
       }
+
+      _cachedArtists = result; // save to cache
+
       return result;
     } else {
       // 2- Throw expcetion if any issue

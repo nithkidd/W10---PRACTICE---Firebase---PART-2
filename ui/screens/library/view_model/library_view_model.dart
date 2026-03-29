@@ -93,4 +93,20 @@ class LibraryViewModel extends ChangeNotifier {
       rethrow;
     }              
   }
+
+  // force fetch function
+  Future<void> refreshSongs() async {
+    songsValue = AsyncValue.loading();
+    notifyListeners();
+
+    try {
+      final songs = await songRepository.fetchSongs(forceFetch: true);
+
+      songsValue = AsyncValue.success(songs);
+    } catch (e) {
+      songsValue = AsyncValue.error(e);
+    }
+
+    notifyListeners();
+  }
 }

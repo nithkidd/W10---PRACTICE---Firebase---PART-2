@@ -30,9 +30,14 @@ class ArtistContent extends StatelessWidget {
         break;
       case AsyncValueState.success:
         List<Artist> artists = asyncValue.data!;
-        content = ListView.builder(
-          itemCount: artists.length,
-          itemBuilder: (context, index) => ArtistTile(artist: artists[index]),
+        content = RefreshIndicator(
+          onRefresh: () async {
+            await mv.refreshArtists();
+          },
+          child: ListView.builder(
+            itemCount: artists.length,
+            itemBuilder: (context, index) => ArtistTile(artist: artists[index]),
+          ),
         );
         break;
     }
@@ -43,6 +48,13 @@ class ArtistContent extends StatelessWidget {
         children: [
           SizedBox(height: 16),
           Text("Artists", style: AppTextStyles.heading),
+          // refresh icon
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              await mv.refreshArtists();
+            },
+          ),
           SizedBox(height: 50),
 
           Expanded(child: content),

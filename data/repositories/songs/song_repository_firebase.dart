@@ -8,9 +8,16 @@ import 'song_repository.dart';
 import '../../firebaseUri.dart';
 
 class SongRepositoryFirebase extends SongRepository {
+  List<Song>? _cachedSongs;
 
   @override
-  Future<List<Song>> fetchSongs() async {
+  Future<List<Song>> fetchSongs({bool forceFetch = false}) async {
+    
+    //cache check, return cache if exists
+    if (!forceFetch && _cachedSongs != null) {
+      return _cachedSongs!;
+    }
+
     final http.Response response = await http.get(songsUri);
 
     if (response.statusCode == 200) {
@@ -23,7 +30,10 @@ class SongRepositoryFirebase extends SongRepository {
         Map<String, dynamic> values = iterable.value;
         result.add(SongDto.fromJson(songId, values));
       }
-      return result;
+
+      _cachedSongs = result; // save to cache
+      
+      return result; // return song
     } else {
       // 2- Throw expcetion if any issue
       throw Exception('Failed to load posts');
@@ -59,6 +69,17 @@ class SongRepositoryFirebase extends SongRepository {
 
       if (patchResponse.statusCode != 200) {
         throw Exception('Failed to update likes');
+      }
+
+      // improved the likes function. 
+      //loop through every song in the list and check cache.
+      if (_cachedSongs != null) {
+        _cachedSongs = _cachedSongs!.map((song) {
+          if (song.id == songId) {
+            return song.copyWith(likes: newLikes);  // same song but the likes updated
+          }
+          return song;
+        }).toList();
       }
     } catch (e) {
       throw Exception('Error liking song: $e');
